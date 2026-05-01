@@ -4,9 +4,49 @@
 
 const DEFAULT_BASE_URL = "https://experiwall.com";
 const TIMEOUT_MS = 30_000;
+const CANONICAL_HOSTS = new Set(["experiwall.com", "www.experiwall.com"]);
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 let baseUrl: string = DEFAULT_BASE_URL;
 let apiKey: string = "";
+
+export interface UrlCheck {
+  ok: boolean;
+  error?: string;
+  canonical: boolean;
+}
+
+/**
+ * Validate that an API base URL is safe to send a secret API key to.
+ * Rejects non-https URLs (except http://localhost) so a single typo or
+ * copy-pasted command can't exfiltrate credentials.
+ */
+export function checkApiUrl(url: string): UrlCheck {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return { ok: false, error: `Invalid API URL: ${url}`, canonical: false };
+  }
+  const isLocal = LOCAL_HOSTS.has(parsed.hostname);
+  if (parsed.protocol === "http:" && !isLocal) {
+    return {
+      ok: false,
+      canonical: false,
+      error: `API URL must use https:// (got http://${parsed.hostname}). Plaintext would expose your API key.`,
+    };
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return {
+      ok: false,
+      canonical: false,
+      error: `API URL must be http(s)://, got ${parsed.protocol}`,
+    };
+  }
+  const canonical =
+    CANONICAL_HOSTS.has(parsed.hostname) || parsed.hostname.endsWith(".experiwall.com");
+  return { ok: true, canonical };
+}
 
 export function initClient(options: { apiKey: string; baseUrl?: string }): void {
   apiKey = options.apiKey;

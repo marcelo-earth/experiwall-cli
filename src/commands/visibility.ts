@@ -146,7 +146,7 @@ export function registerVisibilityCommands(program: Command): void {
         }
       }
 
-      const res = await apiRequest(`/visibility/queries/${id}`, { method: "DELETE" });
+      const res = await apiRequest(`/visibility/queries/${encodeURIComponent(id)}`, { method: "DELETE" });
       if (!res.ok) {
         printError(httpErrorMessage(res));
         process.exit(1);

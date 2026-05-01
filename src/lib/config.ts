@@ -20,8 +20,20 @@ export function loadConfig(): Config | null {
 }
 
 export function saveConfig(config: Config): void {
-  fs.mkdirSync(CONFIG_DIR, { recursive: true });
+  fs.mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
+  // mkdirSync's mode is ignored if the directory already exists; chmod to enforce.
+  try {
+    fs.chmodSync(CONFIG_DIR, 0o700);
+  } catch {
+    // best-effort on platforms without POSIX permissions (Windows)
+  }
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), { mode: 0o600 });
+  // writeFileSync's mode is ignored if the file already exists; chmod to enforce.
+  try {
+    fs.chmodSync(CONFIG_FILE, 0o600);
+  } catch {
+    // best-effort on platforms without POSIX permissions (Windows)
+  }
 }
 
 export function deleteConfig(): void {

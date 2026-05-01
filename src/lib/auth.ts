@@ -1,5 +1,5 @@
 import { resolveApiKey, resolveApiUrl } from "./config.js";
-import { initClient } from "./client.js";
+import { checkApiUrl, initClient } from "./client.js";
 import { printError } from "./output.js";
 
 export function setupClient(flagApiKey?: string, flagApiUrl?: string): boolean {
@@ -18,6 +18,13 @@ export function setupClient(flagApiKey?: string, flagApiUrl?: string): boolean {
     return false;
   }
   const apiUrl = resolveApiUrl(process.env.EXPERIWALL_API_URL, flagApiUrl);
+  if (apiUrl) {
+    const check = checkApiUrl(apiUrl);
+    if (!check.ok) {
+      printError(check.error!);
+      return false;
+    }
+  }
   initClient({ apiKey, baseUrl: apiUrl });
   return true;
 }

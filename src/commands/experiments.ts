@@ -155,7 +155,7 @@ export function registerExperimentCommands(program: Command): void {
       const globals = cmd.optsWithGlobals();
       if (!setupClient(globals.apiKey, globals.apiUrl)) process.exit(1);
 
-      const res = await apiRequest<ExperimentDetail>(`/experiments/${id}`);
+      const res = await apiRequest<ExperimentDetail>(`/experiments/${encodeURIComponent(id)}`);
       if (!res.ok) {
         printError(httpErrorMessage(res));
         process.exit(1);
@@ -224,7 +224,7 @@ export function registerExperimentCommands(program: Command): void {
           process.exit(1);
         }
 
-        const res = await apiRequest(`/experiments/${id}`, { method: "PATCH", body });
+        const res = await apiRequest(`/experiments/${encodeURIComponent(id)}`, { method: "PATCH", body });
         if (!res.ok) {
           printError(httpErrorMessage(res));
           process.exit(1);
@@ -255,7 +255,7 @@ export function registerExperimentCommands(program: Command): void {
         }
       }
 
-      const res = await apiRequest(`/experiments/${id}`, { method: "DELETE" });
+      const res = await apiRequest(`/experiments/${encodeURIComponent(id)}`, { method: "DELETE" });
       if (!res.ok) {
         printError(httpErrorMessage(res));
         process.exit(1);
@@ -274,7 +274,7 @@ export function registerExperimentCommands(program: Command): void {
         const globals = cmd.optsWithGlobals();
         if (!setupClient(globals.apiKey, globals.apiUrl)) process.exit(1);
 
-        const res = await apiRequest(`/experiments/${id}/${action}`, { method: "POST" });
+        const res = await apiRequest(`/experiments/${encodeURIComponent(id)}/${action}`, { method: "POST" });
         if (!res.ok) {
           printError(httpErrorMessage(res));
           process.exit(1);
@@ -300,7 +300,7 @@ export function registerExperimentCommands(program: Command): void {
         if (!setupClient(globals.apiKey, globals.apiUrl)) process.exit(1);
 
         const res = await apiRequest<ExperimentResults>(
-          `/experiments/${id}/results`,
+          `/experiments/${encodeURIComponent(id)}/results`,
           { params: { days: Number(opts.days), environment: opts.environment } }
         );
         if (!res.ok) {

@@ -117,7 +117,7 @@ export function registerApiKeysCommands(program: Command): void {
         }
       }
 
-      const res = await apiRequest(`/api-keys/${id}`, { method: "DELETE" });
+      const res = await apiRequest(`/api-keys/${encodeURIComponent(id)}`, { method: "DELETE" });
       if (!res.ok) {
         printError(httpErrorMessage(res));
         process.exit(1);

@@ -1,7 +1,7 @@
 import { Command } from "commander";
-import { input, password } from "@inquirer/prompts";
+import { confirm, password } from "@inquirer/prompts";
 import { saveConfig, deleteConfig, loadConfig } from "../lib/config.js";
-import { initClient, apiRequest } from "../lib/client.js";
+import { checkApiUrl, initClient, apiRequest } from "../lib/client.js";
 import {
   printSuccess,
   printError,
@@ -16,15 +16,47 @@ export function registerLoginCommands(program: Command): void {
     .description("Save your Experiwall API key to ~/.experiwall/config.json")
     .option("--api-url <url>", "Custom API base URL (for self-hosted or staging)")
     .action(async (opts: { apiUrl?: string }) => {
-      let apiKey: string;
-
-      if (process.stdout.isTTY) {
-        apiKey = await password({
-          message: "Enter your secret API key (ew_sec_*):",
-        });
-      } else {
-        apiKey = await input({ message: "Enter your secret API key:" });
+      if (opts.apiUrl) {
+        const check = checkApiUrl(opts.apiUrl);
+        if (!check.ok) {
+          printError(check.error!);
+          process.exit(1);
+        }
+        if (!check.canonical) {
+          const allow =
+            process.env.EXPERIWALL_ALLOW_CUSTOM_HOST === "1" ||
+            process.env.EXPERIWALL_ALLOW_CUSTOM_HOST === "true";
+          if (!allow) {
+            if (!process.stdout.isTTY) {
+              printError(
+                `Refusing to send your API key to non-canonical host '${opts.apiUrl}'. ` +
+                  "Re-run interactively to confirm, or set EXPERIWALL_ALLOW_CUSTOM_HOST=1."
+              );
+              process.exit(1);
+            }
+            const ok = await confirm({
+              message: `Send your API key to ${opts.apiUrl}? Only continue if you trust this host (e.g. your own self-hosted instance).`,
+              default: false,
+            });
+            if (!ok) {
+              printInfo("Cancelled.");
+              process.exit(0);
+            }
+          }
+        }
       }
+
+      if (!process.stdout.isTTY) {
+        printError(
+          "`experiwall login` requires an interactive terminal. " +
+            "For non-interactive use, set the EXPERIWALL_API_KEY environment variable."
+        );
+        process.exit(1);
+      }
+
+      let apiKey = await password({
+        message: "Enter your secret API key (ew_sec_*):",
+      });
 
       apiKey = apiKey.trim();
       if (!apiKey) {
@@ -80,10 +112,15 @@ export function registerLoginCommands(program: Command): void {
         process.exit(1);
       }
 
-      initClient({
-        apiKey,
-        baseUrl: process.env.EXPERIWALL_API_URL ?? config?.api_url,
-      });
+      const apiUrl = process.env.EXPERIWALL_API_URL ?? config?.api_url;
+      if (apiUrl) {
+        const check = checkApiUrl(apiUrl);
+        if (!check.ok) {
+          printError(check.error!);
+          process.exit(1);
+        }
+      }
+      initClient({ apiKey, baseUrl: apiUrl });
 
       const res = await apiRequest<{
         name: string;
@@ -100,6 +137,7 @@ export function registerLoginCommands(program: Command): void {
         printJson({
           project: res.data,
           api_key_prefix: apiKey.slice(0, 12) + "...",
+          api_url: apiUrl ?? null,
         });
         return;
       }
@@ -109,5 +147,6 @@ export function registerLoginCommands(program: Command): void {
       console.log(`Platform: ${p.platform}`);
       console.log(`ID      : ${p.id}`);
       console.log(`API key : ${apiKey.slice(0, 12)}...`);
+      if (apiUrl) console.log(`API URL : ${apiUrl}`);
     });
 }
