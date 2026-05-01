@@ -1,6 +1,6 @@
 {
   "name": "@experiwall/cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CLI for the Experiwall Management API — manage experiments, view analytics, and configure projects from your terminal",
   "type": "module",
   "bin": {

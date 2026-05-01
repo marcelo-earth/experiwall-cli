@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { spawn } from "node:child_process";
 import { confirm, password } from "@inquirer/prompts";
 import { saveConfig, deleteConfig, loadConfig } from "../lib/config.js";
 import { checkApiUrl, initClient, apiRequest } from "../lib/client.js";
@@ -10,12 +11,36 @@ import {
   isJsonMode,
 } from "../lib/output.js";
 
+const CLI_LOGIN_URL = "https://experiwall.com/cli/login";
+
+function openBrowser(url: string): boolean {
+  const command =
+    process.platform === "darwin"
+      ? "open"
+      : process.platform === "win32"
+        ? "cmd"
+        : "xdg-open";
+  const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
+
+  try {
+    const child = spawn(command, args, {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.unref();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function registerLoginCommands(program: Command): void {
   program
     .command("login")
     .description("Save your Experiwall API key to ~/.experiwall/config.json")
+    .option("--api-key <key>", "Secret API key to save non-interactively")
     .option("--api-url <url>", "Custom API base URL (for self-hosted or staging)")
-    .action(async (opts: { apiUrl?: string }) => {
+    .action(async (opts: { apiKey?: string; apiUrl?: string }) => {
       if (opts.apiUrl) {
         const check = checkApiUrl(opts.apiUrl);
         if (!check.ok) {
@@ -46,17 +71,29 @@ export function registerLoginCommands(program: Command): void {
         }
       }
 
-      if (!process.stdout.isTTY) {
+      if (!opts.apiKey && !process.stdout.isTTY) {
         printError(
           "`experiwall login` requires an interactive terminal. " +
-            "For non-interactive use, set the EXPERIWALL_API_KEY environment variable."
+            "For non-interactive use, run `experiwall login --api-key ew_sec_...` " +
+            "or set the EXPERIWALL_API_KEY environment variable."
         );
         process.exit(1);
       }
 
-      let apiKey = await password({
-        message: "Enter your secret API key (ew_sec_*):",
-      });
+      if (!opts.apiKey) {
+        const opened = openBrowser(CLI_LOGIN_URL);
+        printInfo(
+          opened
+            ? `Opening ${CLI_LOGIN_URL} so you can generate a CLI login command.`
+            : `Need an API key? Open ${CLI_LOGIN_URL}`
+        );
+      }
+
+      let apiKey =
+        opts.apiKey ??
+        (await password({
+          message: "Enter your secret API key (ew_sec_*):",
+        }));
 
       apiKey = apiKey.trim();
       if (!apiKey) {

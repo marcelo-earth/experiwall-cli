@@ -4,24 +4,36 @@ CLI for the [Experiwall](https://experiwall.com) Management API. Manage experime
 
 ## Install
 
-```sh
-npm install -g @experiwall/cli
-```
-
-Or run without installing:
+Run without installing:
 
 ```sh
 npx @experiwall/cli <command>
 ```
 
-## Authentication
+Or install globally:
 
 ```sh
-experiwall login
-# Prompts for your secret key (ew_sec_*)
+npm install -g @experiwall/cli
 ```
 
-Or set the environment variable (useful for CI/CD):
+## Authentication
+
+The easiest way to connect the CLI is:
+
+```sh
+npx @experiwall/cli login
+```
+
+This opens the Experiwall CLI login page in your browser. Sign in, generate the CLI login command, paste it back into your terminal, and verify the connection.
+
+```sh
+npx @experiwall/cli login --api-key ew_sec_...
+npx @experiwall/cli whoami
+```
+
+If you installed globally, use `experiwall` instead of `npx @experiwall/cli`.
+
+For CI/CD, set the environment variable:
 
 ```sh
 export EXPERIWALL_API_KEY=ew_sec_...
