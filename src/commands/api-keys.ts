@@ -92,7 +92,7 @@ export function registerApiKeysCommands(program: Command): void {
       }
 
       const k = res.data!;
-      printSuccess("API key created. Save it now — it will not be shown again.");
+      printSuccess("API key created. Save it now, it will not be shown again.");
       console.log(`\n  ${chalk.bold(k.key)}\n`);
       printWarning("Store this key securely. It cannot be recovered.");
     });

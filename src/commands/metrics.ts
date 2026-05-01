@@ -46,7 +46,7 @@ export function registerMetricsCommands(program: Command): void {
       }
 
       const d = res.data!;
-      console.log(`\nOverview — last ${opts.days} days (${opts.environment})\n`);
+      console.log(`\nOverview: last ${opts.days} days (${opts.environment})\n`);
       console.log(`  Active experiments : ${formatNumber(d.active_experiments)}`);
       console.log(`  Total users        : ${formatNumber(d.total_users)}`);
       console.log(`  Exposures          : ${formatNumber(d.total_exposures)}`);
@@ -130,7 +130,7 @@ export function registerMetricsCommands(program: Command): void {
       }
 
       const d = res.data!;
-      console.log(`\nRevenue — last ${opts.days} days\n`);
+      console.log(`\nRevenue: last ${opts.days} days\n`);
       console.log(`  Total: ${formatCurrency(d.total_revenue)}\n`);
 
       if (d.daily?.length) {

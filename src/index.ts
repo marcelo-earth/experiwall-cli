@@ -15,14 +15,14 @@ import { registerVisibilityCommands } from "./commands/visibility.js";
 const require = createRequire(import.meta.url);
 const pkg = require("../package.json") as { version: string; name: string };
 
-// Async update check — never slows the current command
+// Async update check, never slows the current command
 async function checkForUpdates(): Promise<void> {
   try {
     const { default: updateNotifier } = await import("update-notifier");
     const notifier = updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 12 });
     notifier.notify();
   } catch {
-    // update-notifier is optional — don't crash if it fails
+    // update-notifier is optional, don't crash if it fails
   }
 }
 
