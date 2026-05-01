@@ -32,6 +32,14 @@
     "experimentation"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcelo-earth/experiwall-cli"
+  },
+  "homepage": "https://experiwall.com",
+  "bugs": {
+    "url": "https://github.com/marcelo-earth/experiwall-cli/issues"
+  },
   "dependencies": {
     "@inquirer/prompts": "^7.5.0",
     "chalk": "^5.3.0",
