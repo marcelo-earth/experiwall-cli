@@ -8,9 +8,11 @@ import { registerExperimentCommands } from "./commands/experiments.js";
 import { registerMetricsCommands } from "./commands/metrics.js";
 import { registerUsersCommands } from "./commands/users.js";
 import { registerProjectCommands } from "./commands/project.js";
+import { registerOrgCommands } from "./commands/org.js";
 import { registerApiKeysCommands } from "./commands/api-keys.js";
 import { registerBillingCommands } from "./commands/billing.js";
-import { registerVisibilityCommands } from "./commands/visibility.js";
+import { registerScreensCommands } from "./commands/screens.js";
+import { registerProductsCommands } from "./commands/products.js";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../package.json") as { version: string; name: string };
@@ -47,9 +49,11 @@ registerExperimentCommands(program);
 registerMetricsCommands(program);
 registerUsersCommands(program);
 registerProjectCommands(program);
+registerOrgCommands(program);
 registerApiKeysCommands(program);
 registerBillingCommands(program);
-registerVisibilityCommands(program);
+registerScreensCommands(program);
+registerProductsCommands(program);
 
 // Alias: `experiwall status` -> `experiwall metrics overview`
 program
